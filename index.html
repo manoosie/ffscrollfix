@@ -19361,6 +19361,7 @@ Exposes [Google Feeds API](https://developers.google.com/feed/)
       margin: 0;
       font-family: 'Roboto', 'Noto', sans-serif;
       background-color: #f5f5f5;
+      -webkit-tap-highlight-color: transparent;
     }
 
   </style>
@@ -22246,24 +22247,14 @@ Exposes [Google Feeds API](https://developers.google.com/feed/)
         font-weight: 800;
       }
 
-      #navTitle {
-        position: absolute;
-        color: #fff;
-      }
-
       /* hide nav title when is not in narrow layout */
       app-drawer-layout:not([narrow]) #navTitle {
         display: none;
       }
 
       .article-headline {
-        @apply(--shadow-transition);
         @apply(--shadow-elevation-3dp);
         cursor: pointer;
-      }
-
-      .article-headline:hover {
-        @apply(--shadow-elevation-6dp);
       }
 
       article-detail {
@@ -22311,10 +22302,9 @@ Exposes [Google Feeds API](https://developers.google.com/feed/)
     <carbon-route route="{{subroute}}" matches=":page" page="{{page}}" subroute="{{title}}"></carbon-route>
 
     <!-- manages page's scroll position -->
-    <app-scrollpos-control selected="{{category}}"></app-scrollpos-control>
-    <app-scrollpos-control selected="{{page}}" reset=""></app-scrollpos-control>
+    <app-scrollpos-control selected="{{category}}/{{page}}"></app-scrollpos-control>
 
-    <app-drawer-layout drawer-width="288px" responsive-width="1280px" on-iron-resize="_positionNavTitle" on-opened-change="_positionNavTitle">
+    <app-drawer-layout drawer-width="288px" responsive-width="1280px">
 
       <!-- nav panel -->
       <app-header-layout drawer="" has-scrolling-region="">
@@ -22325,9 +22315,7 @@ Exposes [Google Feeds API](https://developers.google.com/feed/)
           <app-toolbar></app-toolbar>
 
           <!-- bottom toolbar -->
-          <app-toolbar>
-            <div id="navTitle" class="title">{{category}}</div>
-          </app-toolbar>
+          <app-toolbar></app-toolbar>
 
         </app-header>
 
@@ -22476,13 +22464,6 @@ Exposes [Google Feeds API](https://developers.google.com/feed/)
             }
           }
         }
-      },
-
-      // position nav title to be on top of the main title.
-      _positionNavTitle: function() {
-        var style = this.$.navTitle.style;
-        style.top = this.$.mainTitle.offsetTop + 'px';
-        style.left = this.$.mainTitle.offsetLeft + 'px';
       }
 
     });
