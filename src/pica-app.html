@@ -1,0 +1,311 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../components/carbon-elements/carbon-router.html">
+
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-styles/shadow.html">
+
+<link rel="import" href="../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/app-layout/app-scrollpos-control/app-scrollpos-control.html">
+
+<link rel="import" href="article-headline.html">
+<link rel="import" href="article-detail.html">
+<link rel="import" href="two-columns-grid.html">
+<link rel="import" href="pica-feed.html">
+
+<dom-module id="pica-app">
+
+  <template>
+
+    <style>
+
+      :host {
+        --app-primary-color: #607d8b;
+      }
+
+      app-drawer-layout {
+        /* set the nav drawer background color */
+        --app-drawer-background-color: var(--app-primary-color);
+      }
+
+      .nav-menu {
+        background-color: var(--app-primary-color);
+        color: #fff;
+      }
+
+      a {
+        text-decoration: none;
+        color: inherit;
+        font-size: inherit;
+      }
+
+      .nav-menu > a {
+        display: block;
+        padding: 12px 24px;
+        font-size: 20px;
+        font-weight: 400;
+      }
+
+      .nav-menu > a.iron-selected {
+        background-color: #546E7A;
+      }
+
+      [main] app-header {
+        border-bottom: 1px solid #ddd;
+        background-color: #fff;
+        color: #444;
+      }
+
+      .main-title-toolbar {
+        @apply(--layout-center-center);
+      }
+
+      .title {
+        padding-bottom: 40px;
+        font-size: 52px;
+        font-weight: 800;
+      }
+
+      /* hide nav title when is not in narrow layout */
+      app-drawer-layout:not([narrow]) #navTitle {
+        display: none;
+      }
+
+      .article-headline {
+        @apply(--shadow-elevation-3dp);
+        cursor: pointer;
+      }
+
+      article-detail {
+        max-width: 736px;
+        margin: 64px auto;
+        background-color: #fff;
+        @apply(--shadow-elevation-3dp);
+      }
+
+      .no-contents {
+        height: calc(100vh - 129px);
+        @apply(--layout-horizontal);
+        @apply(--layout-center-center);
+        padding: 8px;
+        text-align: center;
+        font-size: 30px;
+        color: #bbb;
+      }
+
+      @media (max-width: 580px) {
+
+        /* make title smaller to fit on screen */
+        .title {
+          font-size: 40px;
+          padding-bottom: 16px;
+        }
+
+      }
+
+      /* narrow layout */
+      @media (max-width: 808px) {
+
+        article-detail {
+          max-width: none;
+          margin: 0;
+        }
+
+      }
+
+    </style>
+
+    <!-- setup routes -->
+    <carbon-router route="{{route}}"></carbon-router>
+    <carbon-route route="{{route}}" matches=":category" category="{{category}}" subroute="{{subroute}}"></carbon-route>
+    <carbon-route route="{{subroute}}" matches=":page" page="{{page}}" subroute="{{title}}"></carbon-route>
+
+    <!-- manages page's scroll position -->
+    <app-scrollpos-control selected="{{category}}/{{page}}"></app-scrollpos-control>
+
+    <app-drawer-layout drawer-width="288px" responsive-width="1280px">
+
+      <!-- nav panel -->
+      <app-header-layout drawer has-scrolling-region>
+
+        <app-header fixed>
+
+          <!-- top toolbar -->
+          <app-toolbar></app-toolbar>
+
+          <!-- bottom toolbar -->
+          <app-toolbar></app-toolbar>
+
+        </app-header>
+
+        <!-- nav menu -->
+        <iron-selector class="nav-menu" selected="{{category}}" attr-for-selected="name" on-iron-activate="_showList">
+          <template is="dom-repeat" items="{{topics}}">
+            <a name="{{item.title}}" href="#/{{item.title}}/list">{{item.title}}</a>
+          </template>
+        </iron-selector>
+
+      </app-header-layout>
+
+      <!-- main panel -->
+      <app-header-layout main>
+
+        <app-header fixed waterfall>
+
+          <!-- top toolbar -->
+          <app-toolbar>
+            <!-- menu button -->
+            <paper-icon-button icon="app:menu" drawer-toggle hidden$="{{_equal(page, 'detail')}}"></paper-icon-button>
+            <!-- back button -->
+            <a href="#/{{category}}/list" hidden$="{{_equal(page, 'list')}}">
+              <paper-icon-button icon="app:arrow-back"></paper-icon-button>
+            </a>
+          </app-toolbar>
+
+          <!-- bottom toolbar -->
+          <app-toolbar class="main-title-toolbar">
+            <div id="mainTitle" class="title">{{category}}</div>
+          </app-toolbar>
+
+        </app-header>
+
+        <!-- list/detail pages -->
+        <iron-pages selected="{{page}}" attr-for-selected="name">
+
+          <!-- list page -->
+          <iron-pages name="list" selected="{{category}}" attr-for-selected="name">
+
+            <template is="dom-repeat" items="{{topics}}" as="topic">
+
+              <!-- category (list of articles) page (lazy-loaded) -->
+              <template is="dom-if" if="{{_equal(category, topic.title)}}">
+                <section name$="{{topic.title}}">
+
+                  <!-- 2-columns grid -->
+                  <two-columns-grid column-width="396" gutter="8">
+                    <template is="dom-repeat" items="{{topic.items}}" as="article">
+                      <a is="article-headline" class="article-headline" article="{{article}}"
+                          href="#/{{topic.title}}/detail/{{article.title}}"></a>
+                    </template>
+                  </two-columns-grid>
+
+                </section>
+              </template>
+
+            </template>
+
+          </iron-pages>
+
+          <!-- detail page -->
+          <article-detail name="detail" article="{{article}}"></article-detail>
+
+        </iron-pages>
+
+      </app-header-layout>
+
+    </app-drawer-layout>
+
+  </template>
+
+  <script>
+
+    Polymer({
+
+      is: 'pica-app',
+
+      properties: {
+
+        /**
+         * The selected category.
+         */
+        category: String,
+
+        /**
+         * The selected page (either `list` or `detail`).
+         */
+        page: String,
+
+        /**
+         * The selected news title.
+         */
+        title: String,
+
+        /**
+         * Topics data.
+         */
+        topics: {
+          type: Object,
+          observer: '_topicsChanged'
+        }
+
+      },
+
+      observers: [
+        '_updateDefaultRoute(route, topics)',
+        '_updateArticle(category, title, topics, topics.*)'
+      ],
+
+      _equal: function(value1, value2) {
+        return value1 === value2;
+      },
+
+      _showList: function() {
+        this.page = 'list';
+      },
+
+      _updateDefaultRoute: function(route, topics) {
+        if (!route && topics && topics.length) {
+          // default route
+          this.route = topics[0].title + '/list'
+        }
+      },
+
+      _topicsChanged: function(topics) {
+        for (var i=0, t; t=topics[i]; i++) {
+          var feed = document.createElement('pica-feed');
+          feed.addEventListener('feed-load', this._feedLoad.bind(this, i));
+          feed.feed = t.feed;
+        }
+      },
+
+      _feedLoad: function(index, e) {
+        var items = e.detail;
+        this.set('topics.' + index + '.items', items);
+      },
+
+      _updateArticle: function(category, title, topics) {
+        for (var i=0, t; t=topics[i]; i++) {
+          if (t.items && t.title === category) {
+            for (var j=0, a; a=t.items[j]; j++) {
+              if (a.title === title) {
+                this.article = a;
+                return;
+              }
+            }
+          }
+        }
+      }
+
+    });
+
+  </script>
+
+</dom-module>

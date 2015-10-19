@@ -1,0 +1,89 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/google-feeds/google-feeds.html">
+
+<script>
+
+(function() {
+
+  Polymer({
+
+    is: 'pica-feed',
+
+    properties: {
+
+      feed: {
+        observer: '_feedChanged'
+      }
+
+    },
+
+    _feedChanged: function(feed) {
+      var feeds = document.createElement('google-feeds');
+      feeds.addEventListener('google-feeds-response', function(e) {
+        var feed = e.detail.feed;
+        var items = feed && feed.entries || [];
+
+        // favicon
+        var icon = GET_FAVICON_URL + feed.link;
+        //
+        items.forEach(function(item) {
+          // scrape image url
+          var m$ = item.content.match(/<img[^>]+src="([^">]+)"/);
+          item.thumb = m$ && m$[1] && m$[1].replace('&amp;', '&');
+          // time since
+          if (item.publishedDate) {
+            var d = item._date || new Date(item.publishedDate);
+            item._date = d;
+            item.since = timeSince(d);
+          }
+          //
+          item.label = feed.title;
+          item.icon = icon;
+        });
+        this.fire('feed-load', items);
+      }.bind(this));
+      feeds.feed = feed;
+    }
+
+  });
+
+  var GET_FAVICON_URL =
+    'http://s2.googleusercontent.com/s2/favicons?alt=feed&domain_url=';
+
+  function timeSince(date) {
+    var s = Math.floor(((new Date()) - date) / 1000);
+    var t = Math.floor(s / 31536000);
+    if (t > 1) {
+      return t + 'y';
+    }
+    t = Math.floor(s / 2592000);
+    if (t > 1) {
+      return t + 'M';
+    }
+    t = Math.floor(s / 86400);
+    if (t >= 1) {
+      return t + 'd';
+    }
+    t = Math.floor(s / 3600);
+    if (t >= 1) {
+      return t + 'h';
+    }
+    t = Math.floor(s / 60);
+    if (t > 1) {
+      return t + 'm';
+    }
+    return Math.floor(s) + 's';
+  };
+
+})();
+
+</script>
