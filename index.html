@@ -21,14 +21,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
  * Code distributed by Google as part of the polymer project is also
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
-// @version 0.7.15
-(function() {
-  window.WebComponents = window.WebComponents || {
-    flags: {}
-  };
+// @version 0.7.14
+window.WebComponents = window.WebComponents || {};
+
+(function(scope) {
+  var flags = scope.flags || {};
   var file = "webcomponents-lite.js";
   var script = document.querySelector('script[src*="' + file + '"]');
-  var flags = {};
   if (!flags.noOpts) {
     location.search.slice(1).split("&").forEach(function(option) {
       var parts = option.split("=");
@@ -44,7 +43,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       }
     }
-    if (flags.log && flags.log.split) {
+    if (flags.log) {
       var parts = flags.log.split(",");
       flags.log = {};
       parts.forEach(function(f) {
@@ -54,14 +53,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       flags.log = {};
     }
   }
+  flags.shadow = flags.shadow || flags.shadowdom || flags.polyfill;
+  if (flags.shadow === "native") {
+    flags.shadow = false;
+  } else {
+    flags.shadow = flags.shadow || !HTMLElement.prototype.createShadowRoot;
+  }
   if (flags.register) {
     window.CustomElements = window.CustomElements || {
       flags: {}
     };
     window.CustomElements.flags.register = flags.register;
   }
-  WebComponents.flags = flags;
-})();
+  scope.flags = flags;
+})(window.WebComponents);
 
 (function(scope) {
   "use strict";
@@ -622,9 +627,6 @@ if (typeof WeakMap === "undefined") {
 }
 
 (function(global) {
-  if (global.JsMutationObserver) {
-    return;
-  }
   var registrationsTable = new WeakMap();
   var setImmediate;
   if (/Trident|Edge/.test(navigator.userAgent)) {
@@ -920,10 +922,7 @@ if (typeof WeakMap === "undefined") {
     }
   };
   global.JsMutationObserver = JsMutationObserver;
-  if (!global.MutationObserver) {
-    global.MutationObserver = JsMutationObserver;
-    JsMutationObserver._isPolyfilled = true;
-  }
+  if (!global.MutationObserver) global.MutationObserver = JsMutationObserver;
 })(self);
 
 window.HTMLImports = window.HTMLImports || {
@@ -1771,9 +1770,8 @@ window.CustomElements.addModule(function(scope) {
       }
     });
   }
-  var hasThrottledAttached = window.MutationObserver._isPolyfilled && flags["throttle-attached"];
-  scope.hasPolyfillMutations = hasThrottledAttached;
-  scope.hasThrottledAttached = hasThrottledAttached;
+  var hasPolyfillMutations = !window.MutationObserver || window.MutationObserver === window.JsMutationObserver;
+  scope.hasPolyfillMutations = hasPolyfillMutations;
   var isPendingMutations = false;
   var pendingMutations = [];
   function deferMutation(fn) {
@@ -1792,7 +1790,7 @@ window.CustomElements.addModule(function(scope) {
     pendingMutations = [];
   }
   function attached(element) {
-    if (hasThrottledAttached) {
+    if (hasPolyfillMutations) {
       deferMutation(function() {
         _attached(element);
       });
@@ -1815,7 +1813,7 @@ window.CustomElements.addModule(function(scope) {
     });
   }
   function detached(element) {
-    if (hasThrottledAttached) {
+    if (hasPolyfillMutations) {
       deferMutation(function() {
         _detached(element);
       });
@@ -14189,6 +14187,8 @@ element.
        *
        * The type of the response is determined by the value of `handleAs` at
        * the time that the request was generated.
+       * 
+       * @type {Object}
        */
       lastResponse: {
         type: Object,
@@ -14198,6 +14198,8 @@ element.
 
       /**
        * lastRequest's error, if any.
+       * 
+       * @type {Object}
        */
       lastError: {
         type: Object,
@@ -15266,6 +15268,8 @@ A complete [guide](https://elements.polymer-project.org/guides/flex-layout) to `
 
       /**
        * Returns the currently selected item.
+       * 
+       * @type {?Object}
        */
       selectedItem: {
         type: Object,
@@ -15310,7 +15314,6 @@ A complete [guide](https://elements.polymer-project.org/guides/flex-layout) to `
        * The set of excluded elements where the key is the `localName`
        * of the element that will be ignored from the item list.
        *
-       * @type {object}
        * @default {template: 1}
        */
       _excludedLocalNames: {
@@ -15777,6 +15780,7 @@ Or, in a Polymer element, you can include a meta in your template:
     // monostate data
     var metaDatas = {};
     var metaArrays = {};
+    var singleton = null;
 
     Polymer.IronMeta = Polymer({
 
@@ -15827,6 +15831,10 @@ Or, in a Polymer element, you can include a meta in your template:
           notify: true
         }
 
+      },
+
+      hostAttributes: {
+        hidden: true
       },
 
       /**
@@ -15922,6 +15930,13 @@ Or, in a Polymer element, you can include a meta in your template:
       }
 
     });
+
+    Polymer.IronMeta.getIronMeta = function getIronMeta() {
+       if (singleton === null) {
+         singleton = new Polymer.IronMeta();
+       }
+       return singleton;
+     };
 
     /**
     `iron-meta-query` can be used to access infomation stored in `iron-meta`.
@@ -16074,10 +16089,11 @@ Example of using an icon named `cherry` from a custom iconset with the ID `fruit
 
     <iron-icon icon="fruit:cherry"></iron-icon>
 
-See [iron-iconset](#iron-iconset) and [iron-iconset-svg](#iron-iconset-svg) for more information about
+See [iron-iconset](iron-iconset) and [iron-iconset-svg](iron-iconset-svg) for more information about
 how to create a custom iconset.
 
-See [iron-icons](https://elements.polymer-project.org/elements/iron-icons?view=demo:demo/index.html) for the default set of icons.
+See the [iron-icons demo](iron-icons?view=demo:demo/index.html) to see the icons available
+in the various iconsets.
 
 
 ### Styling
@@ -17086,6 +17102,7 @@ Custom property | Description | Default
 
 </style>
 <!--
+Material design: [Cards](https://www.google.com/design/spec/components/cards.html)
 
 `paper-material` is a container that renders two shadows on top of each other to
 create the effect of a lifted piece of paper.
@@ -17097,7 +17114,6 @@ Example:
     </paper-material>
 
 @group Paper Elements
-@class paper-material
 @demo demo/index.html
 -->
 
@@ -17635,9 +17651,8 @@ Apply `circle` class to make the rippling effect within a circle.
       // handled). In either case, we can disregard `event.path`.
 
       if (event.target === this) {
-        var focused = event.type === 'focus';
-        this._setFocused(focused);
-      } else if (!this.shadowRoot) {
+        this._setFocused(event.type === 'focus');
+      } else if (!this.shadowRoot && !this.isLightDescendant(event.target)) {
         this.fire(event.type, {sourceEvent: event}, {
           node: this,
           bubbles: event.bubbles,
@@ -17792,6 +17807,9 @@ Apply `circle` class to make the rippling effect within a circle.
       this._setPressed(false);
     },
 
+    /**
+     * @param {!KeyboardEvent} event .
+     */ 
     _spaceKeyDownHandler: function(event) {
       var keyboardEvent = event.detail.keyboardEvent;
       keyboardEvent.preventDefault();
@@ -17799,7 +17817,10 @@ Apply `circle` class to make the rippling effect within a circle.
       this._setPressed(true);
     },
 
-    _spaceKeyUpHandler: function() {
+    /**
+     * @param {!KeyboardEvent} event .
+     */ 
+    _spaceKeyUpHandler: function(event) {
       if (this.pressed) {
         this._asyncClick();
       }
@@ -18230,11 +18251,21 @@ Example:
         type: String,
         observer: 'queryChanged'
       },
-
+      
+      /**
+       * @type {function(MediaQueryList)}
+       */ 
       _boundMQHandler: {
         value: function() {
           return this.queryHandler.bind(this);
         }
+      },
+      
+      /**
+       * @type {MediaQueryList}
+       */ 
+      _mq: {
+        value: null
       }
     },
 
@@ -19002,9 +19033,9 @@ to single column when 2 columns (plus a defined gutter margin) no longer fit on 
       }
       // Following properties are to be set by behavior users
       /**
-       * Library url. Must contain string `%%callback_name%%`.
+       * Library url. Must contain string `%%callback%%`.
        *
-       * `%%callback_name%%` is a placeholder for jsonp wrapper function name
+       * `%%callback%%` is a placeholder for jsonp wrapper function name
        *
        * Ex: https://maps.googleapis.com/maps/api/js?callback=%%callback%%
        * @property libraryUrl
@@ -19103,7 +19134,7 @@ to single column when 2 columns (plus a defined gutter margin) no longer fit on 
         callbackName = name + '_loaded';
         url = url.replace(this.callbackMacro, callbackName);
       } else {
-        this.error = new Error('IronJsonpLibraryBehavior a %%callback_name%% parameter is required in libraryUrl');
+        this.error = new Error('IronJsonpLibraryBehavior a %%callback%% parameter is required in libraryUrl');
         // TODO(sjmiles): we should probably fallback to listening to script.load
         return;
       }
@@ -19195,9 +19226,9 @@ to single column when 2 columns (plus a defined gutter margin) no longer fit on 
 
     properties: {
       /**
-       * Library url. Must contain string `%%callback_name%%`.
+       * Library url. Must contain string `%%callback%%`.
        *
-       * `%%callback_name%%` is a placeholder for jsonp wrapper function name
+       * `%%callback%%` is a placeholder for jsonp wrapper function name
        *
        * Ex: https://maps.googleapis.com/maps/api/js?callback=%%callback%%
        */
@@ -19573,37 +19604,38 @@ Exposes [Google Feeds API](https://developers.google.com/feed/)
 
 </dom-module>
 <dom-module id="paper-material" assetpath="bower_components/paper-material/">
-  <style>
-    :host {
-      display: block;
-      position: relative;
-    }
-
-    :host([animated]) {
-      @apply(--shadow-transition);
-    }
-
-    :host([elevation="1"]) {
-      @apply(--shadow-elevation-2dp);
-    }
-
-    :host([elevation="2"]) {
-      @apply(--shadow-elevation-4dp);
-    }
-
-    :host([elevation="3"]) {
-      @apply(--shadow-elevation-6dp);
-    }
-
-    :host([elevation="4"]) {
-      @apply(--shadow-elevation-8dp);
-    }
-
-    :host([elevation="5"]) {
-      @apply(--shadow-elevation-16dp);
-    }
-  </style>
   <template>
+    <style>
+      :host {
+        display: block;
+        position: relative;
+      }
+
+      :host([animated]) {
+        @apply(--shadow-transition);
+      }
+
+      :host([elevation="1"]) {
+        @apply(--shadow-elevation-2dp);
+      }
+
+      :host([elevation="2"]) {
+        @apply(--shadow-elevation-4dp);
+      }
+
+      :host([elevation="3"]) {
+        @apply(--shadow-elevation-6dp);
+      }
+
+      :host([elevation="4"]) {
+        @apply(--shadow-elevation-8dp);
+      }
+
+      :host([elevation="5"]) {
+        @apply(--shadow-elevation-16dp);
+      }
+    </style>
+
     <content></content>
   </template>
 </dom-module>
@@ -19612,7 +19644,6 @@ Exposes [Google Feeds API](https://developers.google.com/feed/)
     is: 'paper-material',
 
     properties: {
-
       /**
        * The z-depth of this element, from 0-5. Setting to 0 will remove the
        * shadow, and each increasing number greater than 0 will be "deeper"
@@ -19684,10 +19715,6 @@ Exposes [Google Feeds API](https://developers.google.com/feed/)
            page, and that would be bad. */
         -webkit-transform: translate(0, 0);
         transform: translate3d(0, 0, 0);
-      }
-
-      :host([noink]) {
-        pointer-events: none;
       }
 
       #background,
@@ -20133,10 +20160,6 @@ Exposes [Google Feeds API](https://developers.google.com/feed/)
         }
       },
 
-      observers: [
-        '_noinkChanged(noink, isAttached)'
-      ],
-
       get target () {
         var ownerRoot = Polymer.dom(this).getOwnerRoot();
         var target;
@@ -20157,6 +20180,10 @@ Exposes [Google Feeds API](https://developers.google.com/feed/)
       },
 
       attached: function() {
+        // Set up a11yKeysBehavior to listen to key events on the target,
+        // so that space and enter activate the ripple even if the target doesn't
+        // handle key events. The key handlers deal with `noink` themselves.
+        this.keyEventTarget = this.target;
         this.listen(this.target, 'up', 'uiUpAction');
         this.listen(this.target, 'down', 'uiDownAction');
       },
@@ -20325,12 +20352,6 @@ Exposes [Google Feeds API](https://developers.google.com/feed/)
           this.downAction();
         } else {
           this.upAction();
-        }
-      },
-
-      _noinkChanged: function(noink, attached) {
-        if (attached) {
-          this.keyEventTarget = noink ? this : this.target;
         }
       }
     });
@@ -20673,20 +20694,15 @@ Exposes [Google Feeds API](https://developers.google.com/feed/)
       bottom: -120px;
       opacity: 0;
       background-color: var(--app-scrim-color, black);
-      display: none;
-      pointer-events: none;
+      visibility: hidden;
 
-      -webkit-transition: opacity 0.5s ease-out;
-      transition: opacity 0.5s ease-out;
-    }
-
-    :host(.visible) {
-      opacity: var(--app-scrim-opacity, 0.5);
+      transition: 0.5s ease-out;
+      transition-property: opacity, visibility;
     }
 
     :host([visible]) {
-      pointer-events: auto;
-      display: block;
+      opacity: var(--app-scrim-opacity, 0.5);
+      visibility: visible;
     }
 
   </style>
@@ -20707,30 +20723,7 @@ Exposes [Google Feeds API](https://developers.google.com/feed/)
         visible: {
           type: Boolean,
           value: false,
-          reflectToAttribute: true,
-          observer: '_visibleChanged'
-        }
-      },
-
-      listeners: {
-        'transitionend': '_onTransitionEnd'
-      },
-
-      _layoutIfNeeded: function() {
-        return this.offsetWidth;
-      },
-
-      _visibleChanged: function(visible) {
-        if (visible) {
-          this.style.display = 'block';
-        }
-        this._layoutIfNeeded();
-        this.toggleClass('visible', visible);
-      },
-
-      _onTransitionEnd: function(e) {
-        if (!this.visible && e.currentTarget == this) {
-          this.style.display = '';
+          reflectToAttribute: true
         }
       }
 
@@ -20755,20 +20748,17 @@ Exposes [Google Feeds API](https://developers.google.com/feed/)
       position: fixed;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
+
+      @apply(--app-drawer-layout-drawer);
     }
 
-    #scrim {
-      z-index: 2;
+    :host([narrow]) > #drawerContainer {
+      @apply(--app-drawer-layout-narrow-drawer);
     }
 
     #main {
       position: relative;
       height: 100%;
-      z-index: 1;
-    }
-
-    :host([narrow]) app-drawer {
-      z-index: 3;
     }
 
     :host([narrow]) app-drawer {
@@ -20791,14 +20781,14 @@ Exposes [Google Feeds API](https://developers.google.com/feed/)
 
   <template>
 
+    <div id="main" style$="[[_computeMainStyle(narrow, drawerWidth)]]">
+      <content select=":not([drawer])"></content>
+      <app-scrim id="scrim" visible$="[[_isScrimVisible(narrow, opened)]]" on-tap="toggleDrawer"></app-scrim>
+    </div>
+
     <app-drawer id="drawerContainer" position="[[drawerPosition]]" opened="[[_drawerOpened(narrow, opened)]]" style$="[[_computeDrawerStyle(drawerWidth)]]" on-iron-activate="_drawerActivate">
       <content id="drawer" select="[drawer]"></content>
     </app-drawer>
-
-    <div id="main" style$="[[_computeMainStyle(narrow, drawerWidth)]]">
-      <content></content>
-      <app-scrim id="scrim" visible$="[[_isScrimVisible(narrow, opened)]]" on-tap="toggleDrawer"></app-scrim>
-    </div>
 
     <iron-media-query query="[[_computeMediaQuery(forceNarrow, responsiveWidth)]]" on-query-matches-changed="_onQueryMatchesChanged"></iron-media-query>
 
@@ -20929,7 +20919,7 @@ Exposes [Google Feeds API](https://developers.google.com/feed/)
         if (!this.disableDrawerActivate && this.narrow) {
           this.async(function() {
             this.opened = false;
-          }.bind(this));
+          });
         }
       },
 
@@ -21183,7 +21173,6 @@ Exposes [Google Feeds API](https://developers.google.com/feed/)
       top: 0;
       right: 0;
       left: 0;
-      z-index: 1;
     }
 
     :host([has-scrolling-region]) > ::content > app-header {
@@ -21205,11 +21194,11 @@ Exposes [Google Feeds API](https://developers.google.com/feed/)
 
   <template>
 
-    <content id="header" select="app-header"></content>
-
     <div id="contentContainer">
       <content select=":not(app-header)"></content>
     </div>
+
+    <content id="header" select="app-header"></content>
 
   </template>
 
@@ -21385,7 +21374,8 @@ Exposes [Google Feeds API](https://developers.google.com/feed/)
          * Reset the scroll position to 0.
          */
         reset: {
-          type: Boolean
+          type: Boolean,
+          value: false
         }
 
       },
@@ -21485,7 +21475,7 @@ Exposes [Google Feeds API](https://developers.google.com/feed/)
       },
 
       /**
-       * When a sizing option is uzed (`cover` or `contain`), this determines
+       * When a sizing option is used (`cover` or `contain`), this determines
        * how the image is aligned within the element bounds.
        */
       position: {
@@ -21495,7 +21485,7 @@ Exposes [Google Feeds API](https://developers.google.com/feed/)
 
       /**
        * When `true`, any change to the `src` property will cause the `placeholder`
-       * image to be shown until the
+       * image to be shown until the new image has loaded.
        */
       preload: {
         type: Boolean,
@@ -22302,7 +22292,7 @@ Exposes [Google Feeds API](https://developers.google.com/feed/)
     <carbon-route route="{{subroute}}" matches=":page" page="{{page}}" subroute="{{title}}"></carbon-route>
 
     <!-- manages page's scroll position -->
-    <app-scrollpos-control selected="{{category}}/{{page}}"></app-scrollpos-control>
+    <app-scrollpos-control selected="{{category}}/{{page}}" reset="{{_equal(page, 'detail')}}"></app-scrollpos-control>
 
     <app-drawer-layout drawer-width="288px" responsive-width="1280px">
 
