@@ -7,6 +7,7 @@
   "dependencies": {
     "polymer": "polymer/polymer#master",
     "app-layout": "polymerlabs/app-layout#^0.0.4",
+    "carbon-elements": "git@github.com:PolymerElements/carbon-elements.git",
     "font-roboto": "polymerelements/font-roboto#^1.0.0",
     "google-feeds": "GoogleWebComponents/google-feeds#^1.0.0",
     "iron-ajax": "polymerelements/iron-ajax#^1.0.0",
