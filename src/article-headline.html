@@ -28,7 +28,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       .image {
         @apply(--layout-flex);
-        background-color: #eee;
+        background-color: #dadada;
       }
 
       .title {
@@ -41,10 +41,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         line-height: 1.15;
       }
 
+      .since {
+        padding-left: 12px;
+        font-size: 11px;
+        color: #999;
+        letter-spacing: 0.4px;
+        white-space: nowrap;
+      }
+
     </style>
 
     <iron-image class="image" preload fade sizing="cover" src="{{article.thumb}}"></iron-image>
-    <div class="title">{{article.title}}</div>
+    <div class="title"><span>{{article.title}}<span class="since">{{article.since}} ago</span></span></div>
 
   </template>
 

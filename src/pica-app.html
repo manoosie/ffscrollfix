@@ -111,6 +111,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         color: #bbb;
       }
 
+      /* fade-in animation for selected page */
+      iron-pages > *.iron-selected {
+        -webkit-animation: fadeIn 0.8s;
+        animation: fadeIn 0.8s;
+      }
+
+      @-webkit-keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
       @media (max-width: 580px) {
 
         /* make title smaller to fit on screen */
@@ -139,7 +155,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <carbon-route route="{{subroute}}" matches=":page" page="{{page}}" subroute="{{title}}"></carbon-route>
 
     <!-- manages page's scroll position -->
-    <app-scrollpos-control selected="{{category}}/{{page}}"></app-scrollpos-control>
+    <app-scrollpos-control selected="{{category}}/{{page}}" reset="{{_equal(page, 'detail')}}"></app-scrollpos-control>
 
     <app-drawer-layout drawer-width="288px" responsive-width="1280px">
 
@@ -274,7 +290,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _updateDefaultRoute: function(route, topics) {
         if (!route && topics && topics.length) {
           // default route
-          this.route = topics[0].title + '/list'
+          this.route = topics[0].title + '/list';
         }
       },
 
