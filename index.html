@@ -22328,7 +22328,7 @@ Exposes [Google Feeds API](https://developers.google.com/feed/)
     <!-- manages page's scroll position -->
     <app-scrollpos-control selected="{{category}}/{{page}}" reset="{{_equal(page, 'detail')}}"></app-scrollpos-control>
 
-    <app-drawer-layout drawer-width="288px" responsive-width="1280px" narrow="{{narrow}}" opened="{{drawerOpened}}">
+    <app-drawer-layout drawer-width="288px" responsive-width="1280px">
 
       <!-- nav panel -->
       <app-header-layout drawer="" has-scrolling-region="">
@@ -22343,14 +22343,12 @@ Exposes [Google Feeds API](https://developers.google.com/feed/)
 
         </app-header>
 
-        <!-- nav menu (lazy-loaded) -->
-        <template is="dom-if" if="{{_drawerShown(narrow, drawerOpened)}}">
-          <iron-selector class="nav-menu" selected="{{category}}" attr-for-selected="name" on-iron-activate="_showList">
-            <template is="dom-repeat" items="{{topics}}">
-              <a name="{{item.title}}" href="#/{{item.title}}/list">{{item.title}}</a>
-            </template>
-          </iron-selector>
-        </template>
+        <!-- nav menu -->
+        <iron-selector class="nav-menu" selected="{{category}}" attr-for-selected="name" on-iron-activate="_showList">
+          <template is="dom-repeat" items="{{topics}}">
+            <a name="{{item.title}}" href="#/{{item.title}}/list">{{item.title}}</a>
+          </template>
+        </iron-selector>
 
       </app-header-layout>
 
@@ -22455,10 +22453,6 @@ Exposes [Google Feeds API](https://developers.google.com/feed/)
 
       _equal: function(value1, value2) {
         return value1 === value2;
-      },
-
-      _drawerShown: function(narrow, opened) {
-        return !narrow || opened;
       },
 
       _showList: function() {
