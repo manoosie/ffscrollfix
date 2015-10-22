@@ -22378,30 +22378,34 @@ Exposes [Google Feeds API](https://developers.google.com/feed/)
         <iron-pages selected="{{page}}" attr-for-selected="name">
 
           <!-- list page -->
-          <iron-pages name="list" selected="{{category}}" attr-for-selected="name">
+          <template is="dom-if" if="{{_equal(page, 'list')}}">
+            <iron-pages name="list" selected="{{category}}" attr-for-selected="name">
 
-            <template is="dom-repeat" items="{{topics}}" as="topic">
+              <template is="dom-repeat" items="{{topics}}" as="topic">
 
-              <!-- category (list of articles) page (lazy-loaded) -->
-              <template is="dom-if" if="{{_equal(category, topic.title)}}">
-                <section name$="{{topic.title}}">
+                <!-- category (list of articles) page (lazy-loaded) -->
+                <template is="dom-if" if="{{_equal(category, topic.title)}}">
+                  <section name$="{{topic.title}}">
 
-                  <!-- 2-columns grid -->
-                  <two-columns-grid column-width="396" gutter="8">
-                    <template is="dom-repeat" items="{{topic.items}}" as="article">
-                      <a is="article-headline" class="article-headline" article="{{article}}" href="#/{{topic.title}}/detail/{{article.title}}"></a>
-                    </template>
-                  </two-columns-grid>
+                    <!-- 2-columns grid -->
+                    <two-columns-grid column-width="396" gutter="8">
+                      <template is="dom-repeat" items="{{topic.items}}" as="article">
+                        <a is="article-headline" class="article-headline" article="{{article}}" href="#/{{topic.title}}/detail/{{article.title}}"></a>
+                      </template>
+                    </two-columns-grid>
 
-                </section>
+                  </section>
+                </template>
+
               </template>
 
-            </template>
-
-          </iron-pages>
+            </iron-pages>
+          </template>
 
           <!-- detail page -->
-          <article-detail name="detail" article="{{article}}"></article-detail>
+          <template is="dom-if" if="{{_equal(page, 'detail')}}">
+            <article-detail name="detail" article="{{article}}"></article-detail>
+          </template>
 
         </iron-pages>
 
