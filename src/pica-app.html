@@ -307,10 +307,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.set('topics.' + index + '.items', items);
       },
 
-      _updateArticle: function(category, title, topics) {
+      _findTopic: function(topics, category) {
         for (var i=0, t; t=topics[i]; i++) {
           if (t.items && t.title === category) {
-            for (var j=0, a; a=t.items[j]; j++) {
+            return t;
+          }
+        }
+      },
+
+      _updateArticle: function(category, title, topics) {
+        if (title) {
+          var topic = this._findTopic(topics, category);
+          if (topic) {
+            for (var j=0, a; a=topic.items[j]; j++) {
               if (a.title === title) {
                 this.article = a;
                 return;

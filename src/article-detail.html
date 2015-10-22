@@ -21,6 +21,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       :host {
         display: block;
         min-height: 600px;
+        visibility: hidden;
+        opacity: 0;
+        transition-duration: 1s;
+        transition-property: visibility, opacity;
+      }
+
+      :host(.loaded) {
+        visibility: visible;
+        opacity: 1;
       }
 
       header {
@@ -115,6 +124,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _contentChanged: function(content) {
         this.$.main.innerHTML = content;
         this.scopeSubtree(this.$.main);
+        this.toggleClass('loaded', true);
       }
 
     });
