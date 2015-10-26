@@ -5,7 +5,7 @@
   ],
   "private": true,
   "dependencies": {
-    "polymer": "polymer/polymer#master",
+    "polymer": "polymer/polymer#^1.0.0",
     "app-layout": "polymerlabs/app-layout#^0.0.4",
     "carbon-elements": "git@github.com:PolymerElements/carbon-elements.git",
     "font-roboto": "polymerelements/font-roboto#^1.0.0",
