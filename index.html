@@ -23,7 +23,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </script>
 
   <!-- <link rel="import" href="bower_components/font-roboto/roboto.html"> -->
-  <link rel="import" href="bower_components/iron-ajax/iron-ajax.html">
   <link rel="import" href="src/pica-app.html">
 
   <style>
@@ -40,12 +39,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 </head>
 <body unresolved>
 
-  <template is="dom-bind">
-
-    <pica-app topics="{{topics}}"></pica-app>
-    <iron-ajax url="data/topics.json" auto last-response="{{topics}}"></iron-ajax>
-
-  </template>
+  <pica-app></pica-app>
 
 </body>
 </html>
