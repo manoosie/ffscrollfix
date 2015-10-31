@@ -45,7 +45,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <style>body {margin: 0;font-family: 'Roboto', 'Noto', sans-serif;background-color: #f5f5f5;-webkit-tap-highlight-color: transparent;}</style>
 
 </head>
-<body unresolved=""><div hidden="" by-vulcanize=""><dom-module id="carbon-router" assetpath="bower_components/carbon-elements/">
+<body><div hidden="" by-vulcanize=""><dom-module id="carbon-router" assetpath="bower_components/carbon-elements/">
   </dom-module>
 
 <dom-module id="carbon-route" assetpath="bower_components/carbon-elements/">
@@ -72,7 +72,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </dom-module>
 <dom-module id="paper-ripple" assetpath="bower_components/paper-ripple/">
 
-  
+
 
   <template>
     <style>:host {display: block;position: absolute;border-radius: inherit;overflow: hidden;top: 0;left: 0;right: 0;bottom: 0;/* See PolymerElements/paper-behaviors/issues/34. On non-Chrome browsers,* creating a node (with a position:absolute) in the middle of an event* handler "interrupts" that event handler (which happens when the* ripple is created on demand) */pointer-events: none;}:host([animating]) {/* This resolves a rendering issue in Chrome (as of 40) where theripple is not properly clipped by its parent (which may haverounded corners). See: http://jsbin.com/temexa/4Note: We only apply this style conditionally. Otherwise, the browserwill create a new compositing layer for every ripple element on thepage, and that would be bad. */-webkit-transform: translate(0, 0);transform: translate3d(0, 0, 0);}#background,#waves,.wave-container,.wave {pointer-events: none;position: absolute;top: 0;left: 0;width: 100%;height: 100%;}#background,.wave {opacity: 0;}#waves,.wave {overflow: hidden;}.wave-container,.wave {border-radius: 50%;}:host(.circle) #background,:host(.circle) #waves {border-radius: 50%;}:host(.circle) .wave-container {overflow: hidden;}</style>
@@ -257,30 +257,30 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <style>:host {--app-primary-color: #607d8b;}app-drawer-layout {/* set the nav drawer background color */--app-drawer-background-color: var(--app-primary-color);}.nav-menu {background-color: var(--app-primary-color);color: #fff;}a {text-decoration: none;color: inherit;font-size: inherit;}.nav-menu > a {display: block;padding: 12px 24px;font-size: 20px;font-weight: 400;}.nav-menu > a.iron-selected {background-color: #546E7A;}[main] app-header {border-bottom: 1px solid #ddd;background-color: #fff;color: #444;}.main-title-toolbar {@apply(--layout-center-center);}.title {padding-bottom: 40px;font-size: 52px;font-weight: 800;}/* hide nav title when is not in narrow layout */app-drawer-layout:not([narrow]) #navTitle {display: none;}.article-headline {@apply(--shadow-elevation-3dp);cursor: pointer;}article-detail {max-width: 736px;margin: 64px auto;background-color: #fff;@apply(--shadow-elevation-3dp);}.no-contents {height: calc(100vh - 129px);@apply(--layout-horizontal);@apply(--layout-center-center);padding: 8px;text-align: center;font-size: 30px;color: #bbb;}/* fade-in animation for selected page */iron-pages > *.iron-selected {-webkit-animation: fadeIn 0.3s;animation: fadeIn 0.3s;}@-webkit-keyframes fadeIn {from { opacity: 0; }to { opacity: 1; }}@keyframes fadeIn {from { opacity: 0; }to { opacity: 1; }}@media (max-width: 580px) {/* make title smaller to fit on screen */.title {font-size: 40px;padding-bottom: 16px;}}/* narrow layout */@media (max-width: 808px) {article-detail {max-width: none;margin: 0;}}</style>
 
-    
+
     <carbon-router route="{{route}}"></carbon-router>
     <carbon-route route="{{route}}" matches=":category" category="{{category}}" subroute="{{subroute}}"></carbon-route>
     <carbon-route route="{{subroute}}" matches=":page" page="{{page}}" subroute="{{title}}"></carbon-route>
 
-    
+
     <app-scrollpos-control selected="{{category}}/{{page}}" reset="{{_equal(page, 'detail')}}"></app-scrollpos-control>
 
     <app-drawer-layout drawer-width="288px" responsive-width="1280px">
 
-      
+
       <app-header-layout drawer="" has-scrolling-region="">
 
         <app-header fixed="">
 
-          
+
           <app-toolbar></app-toolbar>
 
-          
+
           <app-toolbar></app-toolbar>
 
         </app-header>
 
-        
+
         <iron-selector class="nav-menu" selected="{{category}}" attr-for-selected="name" on-iron-activate="_showList">
           <template is="dom-repeat" items="{{topics}}">
             <a name="{{item.title}}" href="#/{{item.title}}/list">{{item.title}}</a>
@@ -289,41 +289,41 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       </app-header-layout>
 
-      
+
       <app-header-layout main="">
 
         <app-header fixed="" waterfall="">
 
-          
+
           <app-toolbar>
-            
+
             <paper-icon-button icon="app:menu" drawer-toggle="" hidden$="{{_equal(page, 'detail')}}"></paper-icon-button>
-            
+
             <a href="#/{{category}}/list" hidden$="{{_equal(page, 'list')}}">
               <paper-icon-button icon="app:arrow-back"></paper-icon-button>
             </a>
           </app-toolbar>
 
-          
+
           <app-toolbar class="main-title-toolbar">
             <div id="mainTitle" class="title">{{category}}</div>
           </app-toolbar>
 
         </app-header>
 
-        
+
         <iron-pages selected="{{page}}" attr-for-selected="name">
 
-          
+
           <iron-pages name="list" selected="{{category}}" attr-for-selected="name">
 
             <template is="dom-repeat" items="{{topics}}" as="topic">
 
-              
+
               <template is="dom-if" if="{{_equal(category, topic.title)}}">
                 <section name$="{{topic.title}}">
 
-                  
+
                   <two-columns-grid column-width="396" gutter="8">
                     <template is="dom-repeat" items="{{topic.items}}" as="article">
                       <a is="article-headline" class="article-headline" article="{{article}}" href="#/{{topic.title}}/detail/{{article.title}}"></a>
@@ -337,7 +337,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           </iron-pages>
 
-          
+
           <template is="dom-if" if="{{_equal(page, 'detail')}}">
             <article-detail name="detail" article="{{article}}"></article-detail>
           </template>
